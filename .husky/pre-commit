@@ -1,3 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
 npx pretty-quick --staged
+
+ncc build index.js
+git add dist

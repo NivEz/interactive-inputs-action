@@ -26,7 +26,7 @@ inputs:
     default: 'Timeout exceeded without any choice...'
   is-choosing-required:
     description: 'If true - the user must choose one of the choices - in case the user did not choose and there is no default choice - the timeout message will be sent and the run will be cancelled'
-    default: false
+    default: true
   wait-for-timeout-to-finish:
     description: 'If true - the run will wait for the timeout to finish even if the user already chose one of the choices - that will let the user to change his choice before the timeout exceeds'
     default: false
@@ -37,4 +37,4 @@ outputs:
     description: 'The selected choice recieved from Telegram'
 runs:
   using: 'node20'
-  main: 'index.js'
+  main: 'dist/index.js'
