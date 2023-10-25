@@ -7,6 +7,10 @@ const action = async () => {
 		const apiToken = getActionInput('telegram-api-token');
 		const chatId = getActionInput('telegram-chat-id');
 
+		if (!apiToken || !chatId) {
+			throw new Error('telegram-api-token and telegram-chat-id are required inputs');
+		}
+
 		core.setSecret(apiToken);
 		core.setSecret(chatId);
 
