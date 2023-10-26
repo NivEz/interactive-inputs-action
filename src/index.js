@@ -26,6 +26,10 @@ const action = async () => {
 		}
 
 		const question = getActionInput('question');
+		core.debug('Testing logs!');
+		core.debug(question);
+		console.log('question', question);
+		console.debug('question debug', question);
 		if (!question) {
 			core.setFailed('question is a required input');
 		}

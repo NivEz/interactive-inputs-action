@@ -14,8 +14,11 @@ const types = {
 	'simple-message': 'string',
 };
 
+const requiredInputs = ['telegram-api-token', 'telegram-chat-id', 'question'];
+
 export const getActionInput = input => {
-	const actionInput = core.getInput(input);
+	const required = requiredInputs.includes(input);
+	const actionInput = core.getInput(input, { required });
 	const inputType = types[input];
 	if (!inputType) {
 		throw new Error(`Input ${input} is not supported`);
