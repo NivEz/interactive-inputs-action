@@ -10,6 +10,7 @@ inputs:
     required: true
   question:
     description: 'The question / statement that will be used in Telegram followed with buttons (the choices)'
+    required: true
   choices:
     description: 'The choices (buttons) that will be used as the interactive inputs in Telegram - represented as a JSON array of strings'
     default: '[]'
@@ -33,7 +34,7 @@ inputs:
   simple-message:
     description: 'Just a simple message that will be sent through Telegram without any of the functionality of interactive inputs'
 outputs:
-  response:
+  user-response:
     description: 'The selected choice recieved from Telegram'
 runs:
   using: 'node20'
