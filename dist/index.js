@@ -5301,31 +5301,40 @@ const getActionInput = input => {
 	const required = requiredInputs.includes(input);
 	const actionInput = core.getInput(input, { required });
 	const inputType = types[input];
+	console.log(`---------------------\nInput ${input} type: ${inputType}`);
 	if (!inputType) {
 		throw new Error(`Input ${input} is not supported`);
 	}
 	let returnValue;
 	switch (inputType) {
 		case 'string':
+			console.log('In case string', input, inputType, actionInput);
 			return actionInput;
 		case 'number':
+			console.log('In case number', input, inputType, actionInput);
 			if (!actionInput) {
 				return;
 			}
 			const num = parseInt(actionInput);
+			console.log('Number', num);
 			if (isNaN(num)) {
 				throw new Error(`Input ${input} is not a number`);
 			}
 			returnValue = num;
+			break;
 		case 'boolean':
+			console.log('In case boolean', input, inputType, actionInput);
 			returnValue = actionInput === 'true';
+			break;
 		case 'array':
+			console.log('In case array', input, inputType, actionInput);
 			try {
 				const arr = JSON.parse(actionInput);
 				if (!Array.isArray(arr)) {
 					throw new Error();
 				}
 				returnValue = arr;
+				break;
 			} catch (error) {
 				throw new Error(`Input ${input} is not an array`);
 			}
@@ -9823,11 +9832,6 @@ const action = async () => {
 	try {
 		const apiToken = getActionInput('telegram-api-token');
 		const chatId = getActionInput('telegram-chat-id');
-
-		if (!apiToken || !chatId) {
-			core.setFailed('telegram-api-token and telegram-chat-id are required inputs');
-		}
-
 		core.setSecret(apiToken);
 		core.setSecret(chatId);
 
@@ -9843,20 +9847,6 @@ const action = async () => {
 		}
 
 		const question = getActionInput('question');
-
-		console.log('Testing console log!');
-		console.info('Testing console info!');
-		console.debug('Testing console debug!');
-		core.debug('Testing core debug!');
-		core.info('Testing core info!');
-		core.notice('Testing core notice!');
-		core.debug(question);
-		core.info('question', question);
-		console.info('question debug', question);
-
-		if (!question) {
-			core.setFailed('question is a required input');
-		}
 		const choices = getActionInput('choices');
 		const defaultChoice = getActionInput('default-choice');
 		let message = getActionInput('message');

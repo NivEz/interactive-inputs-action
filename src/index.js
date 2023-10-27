@@ -6,11 +6,6 @@ const action = async () => {
 	try {
 		const apiToken = getActionInput('telegram-api-token');
 		const chatId = getActionInput('telegram-chat-id');
-
-		if (!apiToken || !chatId) {
-			core.setFailed('telegram-api-token and telegram-chat-id are required inputs');
-		}
-
 		core.setSecret(apiToken);
 		core.setSecret(chatId);
 
@@ -26,20 +21,6 @@ const action = async () => {
 		}
 
 		const question = getActionInput('question');
-
-		console.log('Testing console log!');
-		console.info('Testing console info!');
-		console.debug('Testing console debug!');
-		core.debug('Testing core debug!');
-		core.info('Testing core info!');
-		core.notice('Testing core notice!');
-		core.debug(question);
-		core.info('question', question);
-		console.info('question debug', question);
-
-		if (!question) {
-			core.setFailed('question is a required input');
-		}
 		const choices = getActionInput('choices');
 		const defaultChoice = getActionInput('default-choice');
 		let message = getActionInput('message');
