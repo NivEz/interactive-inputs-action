@@ -1,68 +1,6 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 9902:
-/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
-
-"use strict";
-__nccwpck_require__.r(__webpack_exports__);
-/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   "getActionInput": () => (/* binding */ getActionInput)
-/* harmony export */ });
-const core = __nccwpck_require__(858);
-
-const types = {
-	'telegram-api-token': 'string',
-	'telegram-chat-id': 'string',
-	question: 'string',
-	choices: 'array',
-	'default-choice': 'string',
-	message: 'string',
-	timeout: 'number',
-	'timeout-message': 'string',
-	'is-choosing-required': 'boolean',
-	'wait-for-timeout-to-finish': 'boolean',
-	'simple-message': 'string',
-};
-
-const getActionInput = input => {
-	const actionInput = core.getInput(input);
-	const inputType = types[input];
-	if (!inputType) {
-		throw new Error(`Input ${input} is not supported`);
-	}
-	let returnValue;
-	switch (inputType) {
-		case 'string':
-			return actionInput;
-		case 'number':
-			if (!actionInput) {
-				return;
-			}
-			const num = parseInt(actionInput);
-			if (isNaN(num)) {
-				throw new Error(`Input ${input} is not a number`);
-			}
-			returnValue = num;
-		case 'boolean':
-			returnValue = actionInput === 'true';
-		case 'array':
-			try {
-				const arr = JSON.parse(actionInput);
-				if (!Array.isArray(arr)) {
-					throw new Error();
-				}
-				returnValue = arr;
-			} catch (error) {
-				throw new Error(`Input ${input} is not an array`);
-			}
-	}
-	return returnValue;
-};
-
-
-/***/ }),
-
 /***/ 320:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -4172,17 +4110,23 @@ class Telenode {
 		this.buttonHandlers = {};
 		this.#baseUrl = 'https://api.telegram.org/bot' + apiToken;
 		this.#secretToken = secretToken;
+		this.useLongPolling = false;
 	}
 
 	createServer({ port, unauthorizedCallback } = {}) {
 		this.unauthorizedHandler = unauthorizedCallback;
+		if (this.useLongPolling) {
+			throw Error('Cannot start server while long polling is active');
+		}
 		runServer(this, port);
 	}
 
-	startLongPolling({ pollingDelay } = {}) {
+	startLongPolling({ pollingDelay, cleanPreviousUpdates } = {}) {
+		this.useLongPolling = true;
 		longPoll({
 			bot: this,
 			pollingDelay,
+			cleanPreviousUpdates,
 			url: this.#baseUrl,
 		});
 	}
@@ -4324,17 +4268,18 @@ module.exports = Telenode;
 
 const axios = __nccwpck_require__(4180);
 
-const longPoll = async ({ bot, pollingDelay = 1000, url }) => {
+const longPoll = async ({ bot, pollingDelay = 1000, cleanPreviousUpdates = true, url }) => {
 	if (pollingDelay < 50) {
 		throw new Error('Polling delay must be at least 50ms');
 	}
 	let offset = 0;
-	while (true) {
+	if (cleanPreviousUpdates) {
+		const recentUpdates = await getUpdates(url, -1);
+		offset = recentUpdates[0]?.update_id + 1 || 0;
+	}
+	while (bot.useLongPolling) {
 		try {
-			const res = await axios.get(url + '/getUpdates', {
-				params: { offset },
-			});
-			const updates = res.data.result;
+			const updates = await getUpdates(url, offset);
 			updates.forEach(update => {
 				bot.telenodeHandler(update);
 				offset = update.update_id + 1;
@@ -4354,6 +4299,14 @@ const longPoll = async ({ bot, pollingDelay = 1000, url }) => {
 		}
 		await sleep(pollingDelay);
 	}
+	console.log('Long polling stopped...');
+};
+
+const getUpdates = async (url, offset) => {
+	const res = await axios.get(url + '/getUpdates', {
+		params: { offset },
+	});
+	return res.data.result;
 };
 
 module.exports = {
@@ -5315,6 +5268,71 @@ function version(uuid) {
 
 var _default = version;
 exports["default"] = _default;
+
+/***/ }),
+
+/***/ 2666:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "getActionInput": () => (/* binding */ getActionInput)
+/* harmony export */ });
+const core = __nccwpck_require__(858);
+
+const types = {
+	'telegram-api-token': 'string',
+	'telegram-chat-id': 'string',
+	question: 'string',
+	choices: 'array',
+	'default-choice': 'string',
+	message: 'string',
+	timeout: 'number',
+	'timeout-message': 'string',
+	'is-choosing-required': 'boolean',
+	'wait-for-timeout-to-finish': 'boolean',
+	'simple-message': 'string',
+};
+
+const requiredInputs = ['telegram-api-token', 'telegram-chat-id', 'question'];
+
+const getActionInput = input => {
+	const required = requiredInputs.includes(input);
+	const actionInput = core.getInput(input, { required });
+	const inputType = types[input];
+	if (!inputType) {
+		throw new Error(`Input ${input} is not supported`);
+	}
+	let returnValue;
+	switch (inputType) {
+		case 'string':
+			return actionInput;
+		case 'number':
+			if (!actionInput) {
+				return;
+			}
+			const num = parseInt(actionInput);
+			if (isNaN(num)) {
+				throw new Error(`Input ${input} is not a number`);
+			}
+			returnValue = num;
+		case 'boolean':
+			returnValue = actionInput === 'true';
+		case 'array':
+			try {
+				const arr = JSON.parse(actionInput);
+				if (!Array.isArray(arr)) {
+					throw new Error();
+				}
+				returnValue = arr;
+			} catch (error) {
+				throw new Error(`Input ${input} is not an array`);
+			}
+	}
+	return returnValue;
+};
+
 
 /***/ }),
 
@@ -9799,7 +9817,7 @@ var __webpack_exports__ = {};
 (() => {
 const core = __nccwpck_require__(858);
 const Telenode = __nccwpck_require__(313);
-const { getActionInput } = __nccwpck_require__(9902);
+const { getActionInput } = __nccwpck_require__(2666);
 
 const action = async () => {
 	try {
@@ -9807,7 +9825,7 @@ const action = async () => {
 		const chatId = getActionInput('telegram-chat-id');
 
 		if (!apiToken || !chatId) {
-			throw new Error('telegram-api-token and telegram-chat-id are required inputs');
+			core.setFailed('telegram-api-token and telegram-chat-id are required inputs');
 		}
 
 		core.setSecret(apiToken);
@@ -9824,22 +9842,68 @@ const action = async () => {
 			return;
 		}
 
-		// early return for testing purposes
-		return;
-
-		bot.startLongPolling({ pollingDelay: 500 });
-
 		const question = getActionInput('question');
+
+		console.log('Testing console log!');
+		console.info('Testing console info!');
+		console.debug('Testing console debug!');
+		core.debug('Testing core debug!');
+		core.info('Testing core info!');
+		core.notice('Testing core notice!');
+		core.debug(question);
+		core.info('question', question);
+		console.info('question debug', question);
+
+		if (!question) {
+			core.setFailed('question is a required input');
+		}
 		const choices = getActionInput('choices');
 		const defaultChoice = getActionInput('default-choice');
-		const message = getActionInput('message');
+		let message = getActionInput('message');
 		const timeout = getActionInput('timeout');
 		const timeoutMessage = getActionInput('timeout-message');
 		const isChoosingRequired = getActionInput('is-choosing-required');
 		const waitForTimeoutToFinish = getActionInput('wait-for-timeout-to-finish');
+
+		bot.startLongPolling({ pollingDelay: 500 });
+
+		const structuredChoices = choices.map(choice => ({ text: choice }));
+		bot.sendInlineKeyboard(chatId, question, structuredChoices);
+
+		let userResponse = defaultChoice;
+		const pollingTimeout = setTimeout(async () => {
+			if (isChoosingRequired && !userResponse) {
+				if (timeoutMessage) {
+					await bot.sendTextMessage(timeoutMessage, chatId);
+				}
+				core.setFailed('Timeout exceeded and no choice has been selected');
+			}
+			if (message) {
+				await sendMessageAfterInteraction(message);
+			}
+		}, timeout * 1000);
+
+		choices.forEach(choice => {
+			bot.onButton(choice, async () => {
+				userResponse = choice;
+				if (!waitForTimeoutToFinish) {
+					bot.useLongPolling = false;
+					clearTimeout(pollingTimeout);
+					if (message) {
+						await sendMessageAfterInteraction(message);
+					}
+				}
+			});
+		});
 	} catch (error) {
 		core.setFailed(error.message);
 	}
+};
+
+const sendMessageAfterInteraction = async message => {
+	message = message.replace('%s', userResponse);
+	core.setOutput('user-response', userResponse);
+	await bot.sendTextMessage(message, chatId);
 };
 
 action();

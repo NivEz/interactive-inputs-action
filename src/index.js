@@ -26,10 +26,17 @@ const action = async () => {
 		}
 
 		const question = getActionInput('question');
-		core.debug('Testing logs!');
+
+		console.log('Testing console log!');
+		console.info('Testing console info!');
+		console.debug('Testing console debug!');
+		core.debug('Testing core debug!');
+		core.info('Testing core info!');
+		core.notice('Testing core notice!');
 		core.debug(question);
-		console.log('question', question);
-		console.debug('question debug', question);
+		core.info('question', question);
+		console.info('question debug', question);
+
 		if (!question) {
 			core.setFailed('question is a required input');
 		}

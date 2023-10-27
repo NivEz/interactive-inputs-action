@@ -2,5 +2,11 @@
 
 npx pretty-quick --staged
 
-ncc build index.js
+npm run build
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
+  echo "Build failed"
+  exit $exit_code
+fi
+
 git add dist

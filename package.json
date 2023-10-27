@@ -1,10 +1,11 @@
 {
 	"name": "interactive-inputs-action",
-	"version": "1.0.0",
+	"version": "0.3.0",
 	"description": "Github actions interacrive inputs using Telegram bot",
 	"main": "index.js",
 	"scripts": {
-		"prepare": "husky install"
+		"prepare": "husky install",
+		"build": "ncc build src/index.js"
 	},
 	"keywords": [],
 	"author": "Niv Ezra",
