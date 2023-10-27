@@ -1,6 +1,6 @@
 {
 	"name": "interactive-inputs-action",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"description": "Github actions interacrive inputs using Telegram bot",
 	"main": "index.js",
 	"scripts": {

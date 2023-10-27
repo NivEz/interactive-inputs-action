@@ -43,7 +43,7 @@ const action = async () => {
 				core.setFailed('Timeout exceeded and no choice has been selected');
 			}
 			if (message) {
-				await sendMessageAfterInteraction(message);
+				await sendMessageAfterInteraction(message, userResponse);
 			}
 		}, timeout * 1000);
 
@@ -54,7 +54,7 @@ const action = async () => {
 					bot.useLongPolling = false;
 					clearTimeout(pollingTimeout);
 					if (message) {
-						await sendMessageAfterInteraction(message);
+						await sendMessageAfterInteraction(message, userResponse);
 					}
 				}
 			});
@@ -64,7 +64,7 @@ const action = async () => {
 	}
 };
 
-const sendMessageAfterInteraction = async message => {
+const sendMessageAfterInteraction = async (message, userResponse) => {
 	message = message.replace('%s', userResponse);
 	core.setOutput('user-response', userResponse);
 	await bot.sendTextMessage(message, chatId);
