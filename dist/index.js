@@ -5339,6 +5339,35 @@ const getActionInput = input => {
 
 /***/ }),
 
+/***/ 6679:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "log": () => (/* binding */ log)
+/* harmony export */ });
+const core = __nccwpck_require__(858);
+
+const log = (message, style) => {
+	let stylePrefix = '';
+	switch (style.toLowerCase()) {
+		case 'bold':
+			stylePrefix = '\u001b[1m';
+			break;
+		case 'italic':
+			stylePrefix = '\u001b[3m';
+			break;
+		case 'underlined':
+			stylePrefix = '\u001b[4m';
+			break;
+	}
+	core.info(stylePrefix + message);
+};
+
+
+/***/ }),
+
 /***/ 8315:
 /***/ ((module) => {
 
@@ -9821,10 +9850,11 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(858);
 const Telenode = __nccwpck_require__(313);
 const { getActionInput } = __nccwpck_require__(2666);
+const { log } = __nccwpck_require__(6679);
 
 const action = async () => {
 	try {
-		console.log('Starting interactive inputs action');
+		log('Starting interactive inputs action', 'bold');
 
 		const apiToken = getActionInput('telegram-api-token');
 		const chatId = getActionInput('telegram-chat-id');
@@ -9837,7 +9867,7 @@ const action = async () => {
 
 		const simpleMessage = getActionInput('simple-message');
 		if (simpleMessage) {
-			console.log('Sending simple message and finishing execution');
+			log('Sending simple message and finishing execution', 'bold');
 			await bot.sendTextMessage(simpleMessage, chatId);
 			return;
 		}
@@ -9858,7 +9888,7 @@ const action = async () => {
 		}
 
 		const structuredChoices = choices.map(choice => [{ text: choice, callback_data: choice }]);
-		console.log('Sending question');
+		log('Sending question', 'bold');
 		await bot.sendInlineKeyboard(chatId, question, structuredChoices);
 
 		let userResponse = defaultChoice;
@@ -9878,13 +9908,13 @@ const action = async () => {
 			}
 		}, timeout * 1000);
 
-		console.log('Registering Telenode handlers');
+		log('Registering Telenode handlers', 'bold');
 		choices.forEach(choice => {
 			bot.onButton(choice, async () => {
 				userResponse = choice;
 				if (!waitForTimeoutToFinish) {
 					clearTimeout(pollingTimeout);
-					console.log('Cleared timeout');
+					log('Cleared timeout', 'bold');
 					await finishInteraction(bot, message, chatId, userResponse);
 				}
 			});
@@ -9897,7 +9927,7 @@ const action = async () => {
 
 const finishInteraction = async (bot, message, chatId, userResponse) => {
 	bot.useLongPolling = false;
-	console.log('Finishing interaction');
+	log('Finishing interaction', 'bold');
 	if (message) {
 		message = message.replace('%s', userResponse);
 		await bot.sendTextMessage(message, chatId);
