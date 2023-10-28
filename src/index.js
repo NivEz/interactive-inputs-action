@@ -31,7 +31,7 @@ const action = async () => {
 
 		bot.startLongPolling({ pollingDelay: 500 });
 
-		const structuredChoices = choices.map(choice => ({ text: choice }));
+		const structuredChoices = choices.map(choice => [{ text: choice, callback_data: choice }]);
 		bot.sendInlineKeyboard(chatId, question, structuredChoices);
 
 		let userResponse = defaultChoice;
