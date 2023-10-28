@@ -9868,9 +9868,7 @@ const action = async () => {
 				}
 				core.setFailed('Timeout exceeded and no choice has been selected');
 			}
-			if (message) {
-				await sendMessageAfterInteraction(message, userResponse);
-			}
+			await finishInteraction(bot, message, chatId, userResponse);
 		}, timeout * 1000);
 
 		choices.forEach(choice => {
@@ -9879,9 +9877,7 @@ const action = async () => {
 				if (!waitForTimeoutToFinish) {
 					bot.useLongPolling = false;
 					clearTimeout(pollingTimeout);
-					if (message) {
-						await sendMessageAfterInteraction(message, userResponse);
-					}
+					await finishInteraction(bot, message, chatId, userResponse);
 				}
 			});
 		});
@@ -9890,10 +9886,12 @@ const action = async () => {
 	}
 };
 
-const sendMessageAfterInteraction = async (message, userResponse) => {
-	message = message.replace('%s', userResponse);
+const finishInteraction = async (bot, message, chatId, userResponse) => {
+	if (message) {
+		message = message.replace('%s', userResponse);
+		await bot.sendTextMessage(message, chatId);
+	}
 	core.setOutput('user-response', userResponse);
-	await bot.sendTextMessage(message, chatId);
 };
 
 action();
