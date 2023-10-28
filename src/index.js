@@ -4,18 +4,20 @@ const { getActionInput } = require('./inputs');
 
 const action = async () => {
 	try {
+		console.log('Starting interactive inputs action');
+
 		const apiToken = getActionInput('telegram-api-token');
 		const chatId = getActionInput('telegram-chat-id');
 		core.setSecret(apiToken);
 		core.setSecret(chatId);
 
-		const simpleMessage = getActionInput('simple-message');
-
 		const bot = new Telenode({
 			apiToken,
 		});
 
+		const simpleMessage = getActionInput('simple-message');
 		if (simpleMessage) {
+			console.log('Sending simple message and finishing execution');
 			await bot.sendTextMessage(simpleMessage, chatId);
 			return;
 		}
@@ -31,8 +33,13 @@ const action = async () => {
 
 		bot.startLongPolling({ pollingDelay: 500 });
 
+		if (!choices.includes(defaultChoice)) {
+			core.warning('Default choice is not in choices');
+		}
+
 		const structuredChoices = choices.map(choice => [{ text: choice, callback_data: choice }]);
-		bot.sendInlineKeyboard(chatId, question, structuredChoices);
+		console.log('Sending question');
+		await bot.sendInlineKeyboard(chatId, question, structuredChoices);
 
 		let userResponse = defaultChoice;
 		const pollingTimeout = setTimeout(async () => {
@@ -41,34 +48,36 @@ const action = async () => {
 					if (timeoutMessage) {
 						await bot.sendTextMessage(timeoutMessage, chatId);
 					}
+					core.error('Timeout exceeded and no choice has been selected');
 					throw new Error('Timeout exceeded and no choice has been selected');
 				}
 				await finishInteraction(bot, message, chatId, userResponse);
 			} catch (error) {
 				bot.useLongPolling = false;
-				console.log('Catching timeout error!!!!');
 				core.setFailed(error.message);
 			}
 		}, timeout * 1000);
 
+		console.log('Registering Telenode handlers');
 		choices.forEach(choice => {
 			bot.onButton(choice, async () => {
 				userResponse = choice;
 				if (!waitForTimeoutToFinish) {
 					clearTimeout(pollingTimeout);
+					console.log('Cleared timeout');
 					await finishInteraction(bot, message, chatId, userResponse);
 				}
 			});
 		});
 	} catch (error) {
 		bot.useLongPolling = false;
-		console.log('Catching error!!!!');
 		core.setFailed(error.message);
 	}
 };
 
 const finishInteraction = async (bot, message, chatId, userResponse) => {
 	bot.useLongPolling = false;
+	console.log('Finishing interaction');
 	if (message) {
 		message = message.replace('%s', userResponse);
 		await bot.sendTextMessage(message, chatId);

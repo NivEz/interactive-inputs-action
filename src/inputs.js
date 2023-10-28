@@ -20,33 +20,27 @@ export const getActionInput = input => {
 	const required = requiredInputs.includes(input);
 	const actionInput = core.getInput(input, { required });
 	const inputType = types[input];
-	console.log(`---------------------\nInput ${input} type: ${inputType}`);
 	if (!inputType) {
 		throw new Error(`Input ${input} is not supported`);
 	}
 	let returnValue;
 	switch (inputType) {
 		case 'string':
-			console.log('In case string', input, inputType, actionInput);
 			return actionInput;
 		case 'number':
-			console.log('In case number', input, inputType, actionInput);
 			if (!actionInput) {
 				return;
 			}
 			const num = parseInt(actionInput);
-			console.log('Number', num);
 			if (isNaN(num)) {
 				throw new Error(`Input ${input} is not a number`);
 			}
 			returnValue = num;
 			break;
 		case 'boolean':
-			console.log('In case boolean', input, inputType, actionInput);
 			returnValue = actionInput === 'true';
 			break;
 		case 'array':
-			console.log('In case array', input, inputType, actionInput);
 			try {
 				const arr = JSON.parse(actionInput);
 				if (!Array.isArray(arr)) {

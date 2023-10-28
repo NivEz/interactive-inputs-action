@@ -5301,33 +5301,27 @@ const getActionInput = input => {
 	const required = requiredInputs.includes(input);
 	const actionInput = core.getInput(input, { required });
 	const inputType = types[input];
-	console.log(`---------------------\nInput ${input} type: ${inputType}`);
 	if (!inputType) {
 		throw new Error(`Input ${input} is not supported`);
 	}
 	let returnValue;
 	switch (inputType) {
 		case 'string':
-			console.log('In case string', input, inputType, actionInput);
 			return actionInput;
 		case 'number':
-			console.log('In case number', input, inputType, actionInput);
 			if (!actionInput) {
 				return;
 			}
 			const num = parseInt(actionInput);
-			console.log('Number', num);
 			if (isNaN(num)) {
 				throw new Error(`Input ${input} is not a number`);
 			}
 			returnValue = num;
 			break;
 		case 'boolean':
-			console.log('In case boolean', input, inputType, actionInput);
 			returnValue = actionInput === 'true';
 			break;
 		case 'array':
-			console.log('In case array', input, inputType, actionInput);
 			try {
 				const arr = JSON.parse(actionInput);
 				if (!Array.isArray(arr)) {
@@ -9830,18 +9824,20 @@ const { getActionInput } = __nccwpck_require__(2666);
 
 const action = async () => {
 	try {
+		console.log('Starting interactive inputs action');
+
 		const apiToken = getActionInput('telegram-api-token');
 		const chatId = getActionInput('telegram-chat-id');
 		core.setSecret(apiToken);
 		core.setSecret(chatId);
 
-		const simpleMessage = getActionInput('simple-message');
-
 		const bot = new Telenode({
 			apiToken,
 		});
 
+		const simpleMessage = getActionInput('simple-message');
 		if (simpleMessage) {
+			console.log('Sending simple message and finishing execution');
 			await bot.sendTextMessage(simpleMessage, chatId);
 			return;
 		}
@@ -9857,8 +9853,13 @@ const action = async () => {
 
 		bot.startLongPolling({ pollingDelay: 500 });
 
+		if (!choices.includes(defaultChoice)) {
+			core.warning('Default choice is not in choices');
+		}
+
 		const structuredChoices = choices.map(choice => [{ text: choice, callback_data: choice }]);
-		bot.sendInlineKeyboard(chatId, question, structuredChoices);
+		console.log('Sending question');
+		await bot.sendInlineKeyboard(chatId, question, structuredChoices);
 
 		let userResponse = defaultChoice;
 		const pollingTimeout = setTimeout(async () => {
@@ -9867,34 +9868,36 @@ const action = async () => {
 					if (timeoutMessage) {
 						await bot.sendTextMessage(timeoutMessage, chatId);
 					}
+					core.error('Timeout exceeded and no choice has been selected');
 					throw new Error('Timeout exceeded and no choice has been selected');
 				}
 				await finishInteraction(bot, message, chatId, userResponse);
 			} catch (error) {
 				bot.useLongPolling = false;
-				console.log('Catching timeout error!!!!');
 				core.setFailed(error.message);
 			}
 		}, timeout * 1000);
 
+		console.log('Registering Telenode handlers');
 		choices.forEach(choice => {
 			bot.onButton(choice, async () => {
 				userResponse = choice;
 				if (!waitForTimeoutToFinish) {
 					clearTimeout(pollingTimeout);
+					console.log('Cleared timeout');
 					await finishInteraction(bot, message, chatId, userResponse);
 				}
 			});
 		});
 	} catch (error) {
 		bot.useLongPolling = false;
-		console.log('Catching error!!!!');
 		core.setFailed(error.message);
 	}
 };
 
 const finishInteraction = async (bot, message, chatId, userResponse) => {
 	bot.useLongPolling = false;
+	console.log('Finishing interaction');
 	if (message) {
 		message = message.replace('%s', userResponse);
 		await bot.sendTextMessage(message, chatId);
