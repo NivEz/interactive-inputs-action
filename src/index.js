@@ -36,13 +36,18 @@ const action = async () => {
 
 		let userResponse = defaultChoice;
 		const pollingTimeout = setTimeout(async () => {
-			if (isChoosingRequired && !userResponse) {
-				if (timeoutMessage) {
-					await bot.sendTextMessage(timeoutMessage, chatId);
+			try {
+				if (isChoosingRequired && !userResponse) {
+					if (timeoutMessage) {
+						await bot.sendTextMessage(timeoutMessage, chatId);
+					}
+					throw new Error('Timeout exceeded and no choice has been selected');
 				}
-				throw new Error('Timeout exceeded and no choice has been selected');
+				await finishInteraction(bot, message, chatId, userResponse);
+			} catch (error) {
+				console.log('Catching timeout error!!!!');
+				core.setFailed(error.message);
 			}
-			await finishInteraction(bot, message, chatId, userResponse);
 		}, timeout * 1000);
 
 		choices.forEach(choice => {
