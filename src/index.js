@@ -45,6 +45,7 @@ const action = async () => {
 				}
 				await finishInteraction(bot, message, chatId, userResponse);
 			} catch (error) {
+				bot.useLongPolling = false;
 				console.log('Catching timeout error!!!!');
 				core.setFailed(error.message);
 			}
@@ -54,19 +55,20 @@ const action = async () => {
 			bot.onButton(choice, async () => {
 				userResponse = choice;
 				if (!waitForTimeoutToFinish) {
-					bot.useLongPolling = false;
 					clearTimeout(pollingTimeout);
 					await finishInteraction(bot, message, chatId, userResponse);
 				}
 			});
 		});
 	} catch (error) {
+		bot.useLongPolling = false;
 		console.log('Catching error!!!!');
 		core.setFailed(error.message);
 	}
 };
 
 const finishInteraction = async (bot, message, chatId, userResponse) => {
+	bot.useLongPolling = false;
 	if (message) {
 		message = message.replace('%s', userResponse);
 		await bot.sendTextMessage(message, chatId);
