@@ -40,7 +40,7 @@ const action = async () => {
 				if (timeoutMessage) {
 					await bot.sendTextMessage(timeoutMessage, chatId);
 				}
-				core.setFailed('Timeout exceeded and no choice has been selected');
+				throw new Error('Timeout exceeded and no choice has been selected');
 			}
 			await finishInteraction(bot, message, chatId, userResponse);
 		}, timeout * 1000);
@@ -56,6 +56,7 @@ const action = async () => {
 			});
 		});
 	} catch (error) {
+		console.log('Catching error!!!!');
 		core.setFailed(error.message);
 	}
 };
