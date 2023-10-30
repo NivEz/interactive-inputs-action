@@ -5,7 +5,7 @@ const { log } = require('./log');
 
 const action = async () => {
 	try {
-		log('Starting interactive inputs action', 'bold');
+		log('Starting interactive inputs action', 'bold', 'cyan');
 
 		const apiToken = getActionInput('telegram-api-token');
 		const chatId = getActionInput('telegram-chat-id');
@@ -18,7 +18,7 @@ const action = async () => {
 
 		const simpleMessage = getActionInput('simple-message');
 		if (simpleMessage) {
-			log('Sending simple message and finishing execution', 'bold');
+			log('Sending simple message and finishing execution', 'bold', 'cyan');
 			await bot.sendTextMessage(simpleMessage, chatId);
 			return;
 		}
@@ -39,7 +39,7 @@ const action = async () => {
 		}
 
 		const structuredChoices = choices.map(choice => [{ text: choice, callback_data: choice }]);
-		log('Sending question', 'bold');
+		log('Sending question', 'bold', 'cyan');
 		await bot.sendInlineKeyboard(chatId, question, structuredChoices);
 
 		let userResponse = defaultChoice;
@@ -59,13 +59,13 @@ const action = async () => {
 			}
 		}, timeout * 1000);
 
-		log('Registering Telenode handlers', 'bold');
+		log('Registering Telenode handlers', 'bold', 'cyan');
 		choices.forEach(choice => {
 			bot.onButton(choice, async () => {
 				userResponse = choice;
 				if (!waitForTimeoutToFinish) {
 					clearTimeout(pollingTimeout);
-					log('Cleared timeout', 'bold');
+					log('Cleared timeout', 'bold', 'cyan');
 					await finishInteraction(bot, message, chatId, userResponse);
 				}
 			});
@@ -78,7 +78,7 @@ const action = async () => {
 
 const finishInteraction = async (bot, message, chatId, userResponse) => {
 	bot.useLongPolling = false;
-	log('Finishing interaction', 'bold');
+	log('Finishing interaction', 'bold', 'cyan');
 	if (message) {
 		message = message.replace('%s', userResponse);
 		await bot.sendTextMessage(message, chatId);

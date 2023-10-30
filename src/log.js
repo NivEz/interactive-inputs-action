@@ -1,17 +1,25 @@
 const core = require('@actions/core');
 
-export const log = (message, style) => {
-	let stylePrefix = '';
-	switch (style.toLowerCase()) {
-		case 'bold':
-			stylePrefix = '\u001b[1m';
-			break;
-		case 'italic':
-			stylePrefix = '\u001b[3m';
-			break;
-		case 'underlined':
-			stylePrefix = '\u001b[4m';
-			break;
-	}
-	core.info(stylePrefix + message);
+const styles = {
+	bold: '\u001b[1m',
+	italic: '\u001b[3m',
+	underlined: '\u001b[4m',
+};
+
+const colors = {
+	black: '\u001b[30m',
+	red: '\u001b[31m',
+	green: '\u001b[32m',
+	yellow: '\u001b[33m',
+	blue: '\u001b[34m',
+	magenta: '\u001b[35m',
+	cyan: '\u001b[36m',
+	white: '\u001b[37m',
+};
+
+export const log = (message, style = '', color = '') => {
+	let prefix = '';
+	prefix += styles[style.toLowerCase()] || '';
+	prefix += colors[color.toLowerCase()] || '';
+	core.info(prefix + message);
 };
