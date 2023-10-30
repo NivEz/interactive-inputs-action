@@ -9,32 +9,32 @@ inputs:
     description: 'The Telegram chat id that will be used for the interactive inputs and messages'
     required: true
   question:
-    description: 'The question / statement that will be used in Telegram followed with buttons (the choices)'
+    description: 'The question / statement that will be used in Telegram followed with buttons (each button represents one of the options)'
     required: true
-  choices:
-    description: 'The choices (buttons) that will be used as the interactive inputs in Telegram - represented as a JSON array of strings'
+  options:
+    description: 'The possible options (buttons) that will appear as the interactive inputs in Telegram - represented as a JSON array of strings'
     default: '[]'
   default-choice:
-    description: 'Default choice that will be used if the user did not choose any of the choices in Telegram'
+    description: 'Default choice that will be used if the user did not choose any of the options in Telegram'
   message:
     description: 'Message that will be sent thorugh Telegram after the user interaction has finished. It is possible to use %s as a variable that will be replaced with the selected choice'
     default: 'The selected choice is: %s'
   timeout:
-    description: 'Timeout in seconds for selecting the choices. When the timeout exceeds - stopping to check for updates from Telegram'
+    description: 'Timeout in seconds for selecting one of the possible options. When the timeout exceeds - stopping to check for updates from Telegram'
     default: 60
   timeout-message:
-    description: 'Message that will be sent to Telegram if the timeout exceeds and the user did not select any of the choices'
+    description: 'Message that will be sent to Telegram if the timeout exceeds and the user did not select any of the options'
     default: 'Timeout exceeded without any choice...'
   is-choosing-required:
-    description: 'If true - the user must choose one of the choices - in case the user did not choose and there is no default choice - the timeout message will be sent and the run will be cancelled'
+    description: 'If true - the user must choose one of the options - in case the user did not choose and there is no default choice - the timeout message will be sent and the run will be cancelled'
     default: true
   wait-for-timeout-to-finish:
-    description: 'If true - the run will wait for the timeout to finish even if the user already chose one of the choices - that will let the user to change his choice before the timeout exceeds'
+    description: 'If true - the run will wait for the timeout to finish even if the user already chose one of the options - that will let the user to change his choice before the timeout exceeds'
     default: false
   simple-message:
     description: 'Just a simple message that will be sent through Telegram without any of the functionality of interactive inputs'
 outputs:
-  user-response:
+  user-choice:
     description: 'The selected choice recieved from Telegram'
 runs:
   using: 'node20'

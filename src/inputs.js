@@ -4,7 +4,7 @@ const types = {
 	'telegram-api-token': 'string',
 	'telegram-chat-id': 'string',
 	question: 'string',
-	choices: 'array',
+	options: 'array',
 	'default-choice': 'string',
 	message: 'string',
 	timeout: 'number',

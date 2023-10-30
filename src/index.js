@@ -24,7 +24,7 @@ const action = async () => {
 		}
 
 		const question = getActionInput('question');
-		const choices = getActionInput('choices');
+		const options = getActionInput('options');
 		const defaultChoice = getActionInput('default-choice');
 		let message = getActionInput('message');
 		const timeout = getActionInput('timeout');
@@ -34,25 +34,25 @@ const action = async () => {
 
 		bot.startLongPolling({ pollingDelay: 500 });
 
-		if (!choices.includes(defaultChoice)) {
-			core.warning('Default choice is not in choices');
+		if (!options.includes(defaultChoice)) {
+			core.warning('Default choice is not in options');
 		}
 
-		const structuredChoices = choices.map(choice => [{ text: choice, callback_data: choice }]);
+		const structuredOptions = options.map(option => [{ text: option, callback_data: option }]);
 		log('Sending question', 'bold', 'cyan');
-		await bot.sendInlineKeyboard(chatId, question, structuredChoices);
+		await bot.sendInlineKeyboard(chatId, question, structuredOptions);
 
-		let userResponse = defaultChoice;
+		let userChoice = defaultChoice;
 		const pollingTimeout = setTimeout(async () => {
 			try {
-				if (isChoosingRequired && !userResponse) {
+				if (isChoosingRequired && !userChoice) {
 					if (timeoutMessage) {
 						await bot.sendTextMessage(timeoutMessage, chatId);
 					}
-					core.error('Timeout exceeded and no choice has been selected');
-					throw new Error('Timeout exceeded and no choice has been selected');
+					core.error('Timeout exceeded and no option has been selected');
+					throw new Error('Timeout exceeded and no option has been selected');
 				}
-				await finishInteraction(bot, message, chatId, userResponse);
+				await finishInteraction(bot, message, chatId, userChoice);
 			} catch (error) {
 				bot.useLongPolling = false;
 				core.setFailed(error.message);
@@ -60,13 +60,13 @@ const action = async () => {
 		}, timeout * 1000);
 
 		log('Registering Telenode handlers', 'bold', 'cyan');
-		choices.forEach(choice => {
-			bot.onButton(choice, async () => {
-				userResponse = choice;
+		options.forEach(option => {
+			bot.onButton(option, async () => {
+				userChoice = option;
 				if (!waitForTimeoutToFinish) {
 					clearTimeout(pollingTimeout);
 					log('Cleared timeout', 'bold', 'cyan');
-					await finishInteraction(bot, message, chatId, userResponse);
+					await finishInteraction(bot, message, chatId, userChoice);
 				}
 			});
 		});
@@ -76,14 +76,14 @@ const action = async () => {
 	}
 };
 
-const finishInteraction = async (bot, message, chatId, userResponse) => {
+const finishInteraction = async (bot, message, chatId, userChoice) => {
 	bot.useLongPolling = false;
 	log('Finishing interaction', 'bold', 'cyan');
 	if (message) {
-		message = message.replace('%s', userResponse);
+		message = message.replace('%s', userChoice);
 		await bot.sendTextMessage(message, chatId);
 	}
-	core.setOutput('user-response', userResponse);
+	core.setOutput('user-choice', userChoice);
 };
 
 action();
