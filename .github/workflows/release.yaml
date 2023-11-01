@@ -4,6 +4,9 @@ on:
     tags:
       - '**'
 
+env:
+  GITHUB_TOKEN: ${{ secrets.PAT }}
+
 jobs:
   github-release:
     runs-on: ubuntu-latest
@@ -31,6 +34,7 @@ jobs:
         run: echo "LATEST_TAG=$(jq -r .version package.json)" >> $GITHUB_ENV
 
       - name: Create Github release
+        if: steps.should-release.outputs.user-choice == 'yes'
         uses: ncipollo/release-action@v1
         with:
           tag: 'v${{ env.LATEST_TAG }}'
