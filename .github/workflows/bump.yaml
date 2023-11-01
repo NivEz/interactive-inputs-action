@@ -27,11 +27,8 @@ jobs:
           timeout: 60
           wait-for-timeout-to-finish: true
 
-      - name: Exit if should not bump
-        if: steps.bump.outputs.user-choice == 'skip'
-        run: exit 0
-
       - name: Setup git config
+        if: steps.bump.outputs.user-choice != 'skip'
         run: |
           git config user.name "GitHub Actions"
           git config user.email "${{ secrets.GIT_CONFIG_EMAIL }}"
