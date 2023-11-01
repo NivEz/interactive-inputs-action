@@ -10,7 +10,6 @@ inputs:
     required: true
   question:
     description: 'The question / statement that will be used in Telegram followed with buttons (each button represents one of the options)'
-    required: true
   options:
     description: 'The possible options (buttons) that will appear as the interactive inputs in Telegram - represented as a JSON array of strings'
     default: '[]'

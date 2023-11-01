@@ -1,0 +1,43 @@
+name: Bump
+on:
+  push:
+    branches:
+      - '**'
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get bump input from Telegram
+        id: bump
+        uses: ./
+        with:
+          telegram-api-token: ${{ secrets.TELEGRAM_API_TOKEN }}
+          telegram-chat-id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          question: 'Which bump type you wish to perform?'
+          options: '["prerelease", "patch", "minor", "major", "skip"]'
+          default-choice: 'skip'
+          message: 'The selected bump type is: %s'
+          timeout: 60
+          wait-for-timeout-to-finish: true
+
+      - name: Exit if should not bump
+        if: steps.bump.outputs.user-choice == 'skip'
+        run: exit 0
+
+      - name: Setup git config
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "${{ secrets.GIT_CONFIG_EMAIL }}"
+
+      - name: Bump version
+        run: npm version ${{ steps.bump.outputs.user-choice }} -m "v%s"
+
+      - name: Push
+        run: git push --follow-tags
