@@ -2,6 +2,8 @@
 
 GitHub Action for executing interactive inputs via Telegram
 
+<img src="https://github.com/NivEz/interactive-inputs-action/assets/86365162/166854ac-6a2b-4c0a-b95d-b00e49ad94e4" alt="Interactive Inputs Action screenshot" height="480" />
+
 ## About
 
 Interactive inputs are inputs that are being controlled durring the execution of a workflow run.
